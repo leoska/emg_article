@@ -7,16 +7,28 @@ Created on Tue Feb 11 23:18:16 2020
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 from dataset import create_dataset
-from subplots import plot_signal
-from tensorflow.keras import utils
+from subplots import plot_signal, plot_examples
+from simpleautoencoder import simpleautoencoder, deepautoencoder
+
 
 #%%
 
 # path to your directory with dataset files
 files_path = "data/" 
 # 6 persons ( 1 - Андрей, 2 - АндрСеме, 3 - Лёня, 4 - Миша, 5 - Юра, 6 - Алексей Олегович )
-persons = [1, 2, 4, 5, 6]
+train_persons = [1, 2, 4, 5]
+test_persons = [3, 6]
+
+persons = {
+        1: "Андрей Лук",
+        2: "Андрей Сем",
+        3: "Лёня",
+        4: "Миша",
+        5: "Юра",
+        6: "Алексей",
+        }
 
 # У каждого субъекта по девять жестов. 
 #1) сгибание указательного пальца; 
@@ -40,21 +52,82 @@ classes = [
         "сжатие в кулак"
         ]
 
+signal_len = 400
+
 #%%
 
-# Load dataset from files_path
-(train_signals, train_labels) = create_dataset(files_path, persons)
+# Load dataset from directory files_path
+(train_signals, train_labels, train_positions) = create_dataset(files_path, train_persons, randomize=False)
+(test_signals, test_labels, test_positions) = create_dataset(files_path, test_persons, randomize=True)
 
 # Print shape of 
 print("Train signal shape: " + str(train_signals.shape))
 print("Train labels shape: " + str(train_labels.shape))
-#print("Test signal shape: " + str(test_signals.shape))
-#print("Test labels shape: " + str(test_labels.shape))
-#print("Val signal shape: " + str(val_signals.shape))
-#print("Val labels shape: " + str(val_labels.shape))
+print("Test signal shape: " + str(test_signals.shape))
+print("Test labels shape: " + str(test_labels.shape))
 
 print("Load data successful")
 
 #%%
-example_class = np.argmax(train_labels[165])
-plot_signal(train_signals[165], label = classes[example_class], title = "Пример тренировочного сигнала")
+# Normalization of dataset
+train_signals = train_signals / 120
+test_signals = test_signals / 120
+
+#%%
+
+# Print one from each person[class]
+fig, axs = plt.subplots(len(train_persons), len(classes), figsize=(15, 9))
+
+for p in range(len(train_persons)):
+    for c in range(len(classes)):
+        pos = train_positions[train_persons[p]][c]
+        axs[p, c].plot(train_signals[pos])
+        axs[p, c].set(xlabel = classes[c], ylabel = persons[train_persons[p]])
+        axs[p, c].tick_params('x', labelrotation=45)
+#        for label in axs[p, c].get_xticklabels():
+#            print(label)
+        
+for ax in axs.flat:
+    ax.label_outer()
+
+        
+plt.show()   
+
+#%%
+
+#autoencoder, encoder, decoder = simpleautoencoder(signal_len)
+autoencoder, encoder, decoder = deepautoencoder(signal_len)
+
+print(autoencoder.summary())
+
+autoencoder.compile(optimizer = 'adam', loss = 'mse', metrics = ["accuracy"])
+
+autoencoder.fit(train_signals, train_signals,
+                epochs=100,
+                batch_size=256,
+                shuffle=True,
+                validation_data=(test_signals, test_signals))
+
+#%%
+encoded_signals = encoder.predict(test_signals, batch_size=256)
+decoded_signals = decoder.predict(encoded_signals, batch_size=256)
+
+plot_examples(test_signals, encoded_signals, colors = ['r', 'g'])
+
+plot_examples(test_signals, decoded_signals)
+
+score = autoencoder.evaluate(x = test_signals, y = test_signals, verbose = 0)
+print(score)
+print('Test accuracy:', score[1])
+
+y_test = []
+for i in test_labels:
+    y_test.append(np.argmax(i))
+
+#%%
+    
+# Need learning it
+plt.figure(figsize=(6, 6))
+plt.scatter(encoded_signals[:, 0], encoded_signals[:, 1], c=y_test)
+plt.colorbar()
+plt.show()
