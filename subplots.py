@@ -10,6 +10,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# Метод для отображения сигнала (сокращение в 1 строчку кода)
 def plot_signal(signal, color = "b", label = "", title = ""):
     plt.figure(figsize=(15,7))
     plt.plot(signal, color, label = label)
@@ -17,10 +18,20 @@ def plot_signal(signal, color = "b", label = "", title = ""):
     plt.legend()
     plt.show()
     
+# Метод для отображения сигналов (сокращение в 1 строчку кода)
 def plot_signals(signals, colors, labels, title = ""):
     plt.figure(figsize=(15,7))
     for i in range(len(signals)):
         plt.plot(signals[i], colors[i], label=labels[i])
+    plt.title(title)
+    plt.legend()
+    plt.show() 
+    
+# Метод для отображения сигналов (сокращение в 1 строчку кода)
+def plot_signals_with_linestyle(signals, colors, labels, linestyle, title = ""):
+    plt.figure(figsize=(15,7))
+    for i in range(len(signals)):
+        plt.plot(signals[i], colors[i], label=labels[i], linestyle = linestyle[i])
     plt.title(title)
     plt.legend()
     plt.show() 
@@ -100,6 +111,7 @@ def network_evaluation(history, epochs, batch_size):
     plt.legend()
     plt.show()
 #plt.savefig(args["plot"])
+    
     
 def show_confusion_matrix(validations, predictions):
     matrix = metrics.confusion_matrix(validations, predictions)

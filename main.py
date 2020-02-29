@@ -9,8 +9,9 @@ Created on Tue Feb 11 23:18:16 2020
 import numpy as np
 import matplotlib.pyplot as plt
 from dataset import create_dataset
-from subplots import plot_signal, plot_examples
-from simpleautoencoder import simpleautoencoder, deepautoencoder
+from subplots import plot_signal, plot_examples, plot_signals, plot_signals_with_linestyle
+from autoencoders import simpleautoencoder, deepautoencoder
+from scipy import signal
 
 
 #%%
@@ -57,6 +58,8 @@ signal_len = 400
 #%%
 
 # Load dataset from directory files_path
+# Создание датасета (обучение и тестовые) из файлов в директории files_path
+# Для автокодировщика не требуется validation dataset
 (train_signals, train_labels, train_positions) = create_dataset(files_path, train_persons, randomize=False)
 (test_signals, test_labels, test_positions) = create_dataset(files_path, test_persons, randomize=True)
 
@@ -70,13 +73,19 @@ print("Load data successful")
 
 #%%
 # Normalization of dataset
+# Нормализация датасета
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!! Под вопросом, потому что максимальное значение взято на глаз по графику !!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 train_signals = train_signals / 120
 test_signals = test_signals / 120
 
 #%%
 
-# Print one from each person[class]
-fig, axs = plt.subplots(len(train_persons), len(classes), figsize=(15, 9))
+# Print one signal from each person[class]
+fig, axs = plt.subplots(len(train_persons), len(classes), figsize=(25, 9))
 
 for p in range(len(train_persons)):
     for c in range(len(classes)):
@@ -126,8 +135,37 @@ for i in test_labels:
 
 #%%
     
-# Need learning it
+# Need learning it from official KERAS AUTOENCODER documentation
 plt.figure(figsize=(6, 6))
 plt.scatter(encoded_signals[:, 0], encoded_signals[:, 1], c=y_test)
 plt.colorbar()
 plt.show()
+
+
+#%%
+
+# Number of signal for review
+sig = 1
+
+diffXbetY = []
+for i in range(len(test_signals[sig])):
+    diffXbetY.append(abs(test_signals[sig, i] - decoded_signals[sig, i]))
+
+plot_signals_with_linestyle([test_signals[sig], decoded_signals[sig], diffXbetY], ['r','b', 'orange'], ['вход', 'выход', 'разница'], ["-","-","--"])
+
+#%%
+# Welch for difference between test and decoded signals
+frex, Pxx = signal.welch(test_signals[sig])
+frey, Pyy = signal.welch(decoded_signals[sig])
+frew, Pyw = signal.welch(diffXbetY)
+
+fig2 = plt.figure(figsize=(12, 6))
+plt.semilogy(frex, Pxx, label = "Исходный тестовый сигнал")
+plt.semilogy(frey, Pyy, label = "Декодированный тестовый сигнал")
+plt.semilogy(frew, Pyw, label = "Разница между тестовым и декодированным сигналом")
+plt.grid(True)
+plt.xlabel('Frequency [Hz]')
+plt.ylabel('PSD')
+plt.legend()
+plt.show()
+
