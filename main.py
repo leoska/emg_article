@@ -79,8 +79,8 @@ print("Load data successful")
 #!! Под вопросом, потому что максимальное значение взято на глаз по графику !!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-train_signals = train_signals / 120
-test_signals = test_signals / 120
+#train_signals = train_signals / 120
+#test_signals = test_signals / 120
 
 #%%
 
@@ -136,10 +136,10 @@ for i in test_labels:
 #%%
     
 # Need learning it from official KERAS AUTOENCODER documentation
-plt.figure(figsize=(6, 6))
-plt.scatter(encoded_signals[:, 0], encoded_signals[:, 1], c=y_test)
-plt.colorbar()
-plt.show()
+#plt.figure(figsize=(6, 6))
+#plt.scatter(encoded_signals[:, 0], encoded_signals[:, 1], c=y_test)
+#plt.colorbar()
+#plt.show()
 
 
 #%%
@@ -151,7 +151,17 @@ diffXbetY = []
 for i in range(len(test_signals[sig])):
     diffXbetY.append(abs(test_signals[sig, i] - decoded_signals[sig, i]))
 
-plot_signals_with_linestyle([test_signals[sig], decoded_signals[sig], diffXbetY], ['r','b', 'orange'], ['вход', 'выход', 'разница'], ["-","-","--"])
+plot_signals_with_linestyle([test_signals[sig], decoded_signals[sig], diffXbetY], 
+                            ['r','b', 'orange'], 
+                            ['вход', 'выход', 'разница'], 
+                            ["-","-","--"], 
+                            title="Разница между тестовым и декодированным сигналом")
+
+plt.figure(figsize=(15, 7))
+plt.stackplot(range(400), diffXbetY, color="orange", labels=["Разница"])
+plt.title("Разница между тестовым и декодированным сигналом")
+plt.legend()
+plt.show() 
 
 #%%
 # Welch for difference between test and decoded signals
