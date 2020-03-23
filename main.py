@@ -104,6 +104,25 @@ plt.show()
 
 #%%
 
+fig, axs = plt.subplots(len(test_persons), len(classes), figsize=(25, 5))
+
+for p in range(len(test_persons)):
+    for c in range(len(classes)):
+        pos = test_positions[test_persons[p]][c]
+        axs[p, c].plot(test_signals[pos])
+        axs[p, c].set(xlabel = classes[c], ylabel = persons[test_persons[p]])
+        axs[p, c].tick_params('x', labelrotation=45)
+#        for label in axs[p, c].get_xticklabels():
+#            print(label)
+        
+for ax in axs.flat:
+    ax.label_outer()
+
+        
+plt.show() 
+
+#%%
+
 #autoencoder, encoder, decoder = simpleautoencoder(signal_len)
 autoencoder, encoder, decoder = deepautoencoder(signal_len)
 
