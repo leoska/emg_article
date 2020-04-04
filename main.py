@@ -6,9 +6,14 @@ Created on Tue Feb 11 23:18:16 2020
 @author: leonidkotov
 """
 
+#Нампай
+#Сайпай
+#bottleneck layer - пережатый слой
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import tensorflow as tf
 from dataset import create_dataset, load_from_file_with_index
 from subplots import plot_signal, plot_examples, plot_signals, plot_signals_with_linestyle
 from autoencoders import simpleautoencoder, deepautoencoder, deepautoencoder_work
@@ -18,8 +23,24 @@ from sklearn import preprocessing
 from fir_filter import get_filtered_signals
 
 
+#%%
 def rms(x):
     return np.sqrt(np.mean(x**2))
+
+
+#%%
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  # Restrict TensorFlow to only use the first GPU
+  try:
+    tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
+    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
+  except RuntimeError as e:
+    # Visible devices must be set before GPUs have been initialized
+    print(e)
 
 
 #%%
@@ -99,7 +120,7 @@ test_signals = get_filtered_signals(test_signals_pre)
 
 # Print one signal from each person[class] from train_signals
 fig, axs = plt.subplots(len(train_persons), len(classes), figsize=(25, 9))
-plt.title("Пример каждого класса движения каждого субъекта тренировочных данных")
+#plt.title("Пример каждого класса движения каждого субъекта тренировочных данных")
 
 for p in range(len(train_persons)):
     for c in range(len(classes)):
@@ -120,7 +141,7 @@ plt.show()
 
 # Print one signal from each person[class] from test_signals
 fig, axs = plt.subplots(len(test_persons), len(classes), figsize=(25, 5))
-plt.title("Пример каждого класса движения каждого субъекта тестовых данных")
+#plt.title("Пример каждого класса движения каждого субъекта тестовых данных")
 
 for p in range(len(test_persons)):
     for c in range(len(classes)):
@@ -149,7 +170,7 @@ print(autoencoder.summary())
 
 autoencoder.compile(optimizer = 'adam', loss = 'mse', metrics = ["accuracy"])
 
-autoencoder.fit(train_signals, train_signals,
+history = autoencoder.fit(train_signals, train_signals,
                 epochs=25,
                 batch_size=256,
                 shuffle=True,
@@ -184,12 +205,33 @@ for i in test_labels:
 #plt.show()
     
 #%%
-x_inputs = np.array([])
+    
+# Графики суммы коэффициентов нейронов в bottleneck слое
+x_inputs = np.eye(8, dtype=np.float64)
+x_result = decoder.predict(x_inputs, batch_size=256)
+
+for i in range(8):
+    plt.figure(figsize=(15, 7))
+    plt.plot(x_result[i])
+    plt.title("Сумма коэффициентов " + str(i) + " нейрона")
+    plt.show()
+
 #%%
-# for i in range(8):
-#     newX = np.zeros(8)
-#     newX[i] = 1
-#     x_inputs = np.vstack((x_inputs, newX))
+
+# 1 график суммы коэффициентов
+fig, axs = plt.subplots(2, 8, figsize=(40, 6))
+
+for p in range(8):
+    axs[0, p].plot(x_inputs[p], color="orange")
+    axs[1, p].plot(x_result[p])
+    axs[1, p].set(xlabel = "Сумма коэффициентов " + str(p) + " нейрона")
+    axs[1, p].tick_params('x', labelrotation=45)
+
+for ax in axs.flat:
+    ax.label_outer()
+
+
+plt.show()   
 
 #%%
 

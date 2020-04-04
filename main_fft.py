@@ -17,11 +17,14 @@ from scipy import signal
 from scipy.fftpack import fft
 from sklearn import preprocessing
 from fir_filter import get_filtered_signals
+import tensorflow as tf
 
 
 def rms(x):
     return np.sqrt(np.mean(x**2))
 
+#%%
+tf.keras.backend.clear_session()
 
 #%%
 
@@ -105,7 +108,7 @@ test_signals = fft(test_signals_pre, n = 256)
 
 # Print one signal from each person[class] from train_signals
 fig, axs = plt.subplots(len(train_persons), len(classes), figsize=(25, 9))
-plt.title("Пример каждого класса движения каждого субъекта тренировочных данных")
+#plt.title("Пример каждого класса движения каждого субъекта тренировочных данных")
 
 for p in range(len(train_persons)):
     for c in range(len(classes)):
@@ -126,7 +129,7 @@ plt.show()
 
 # Print one signal from each person[class] from test_signals
 fig, axs = plt.subplots(len(test_persons), len(classes), figsize=(25, 5))
-plt.title("Пример каждого класса движения каждого субъекта тестовых данных")
+#plt.title("Пример каждого класса движения каждого субъекта тестовых данных")
 
 for p in range(len(test_persons)):
     for c in range(len(classes)):
