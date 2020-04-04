@@ -90,15 +90,23 @@ def plot_history(history):
     ax = plt.subplot(1, 2, 2)
     plt.plot(history.history["val_loss"])
     plt.title("График ошибки на проверочных данных")
+    plt.xlabel("Эпоха #")
+    plt.ylabel("Значение ошибки")
     plt.show()
     
     plt.figure(figsize=(15, 5))
     ax = plt.subplot(1, 2, 1)
-    plt.plot(history.history["acc"])
+    x = [acc * 100 for acc in history.history["acc"]]
+    plt.plot(np.round(x, 2))
     plt.title("Доля верных ответов на тренировочных данных")
+    plt.xlabel("Эпоха #")
+    plt.ylabel("Процент верных ответов")
     ax = plt.subplot(1, 2, 2)
-    plt.plot(history.history["val_acc"])
+    x = [val_acc * 100 for val_acc in history.history["val_acc"]]
+    plt.plot(np.round(x, 2))
     plt.title("Доля верных ответов на проверочных данных")
+    plt.xlabel("Эпоха #")
+    plt.ylabel("Процент верных ответов")
     plt.show()
 
 
@@ -167,10 +175,10 @@ classes = [
 
 deep_model = Sequential()
 deep_model.add(Input(shape=(feature_len,)))
-deep_model.add(Dense(11, input_shape=(feature_len,), activation='relu'))
-deep_model.add(Dense(5, input_shape=(11,), activation='relu'))
-deep_model.add(Dense(2, input_shape=(5,), activation='relu'))
-deep_model.add(Dense(classes_count, input_shape=(2,), activation='softmax'))
+deep_model.add(Dense(80, input_shape=(feature_len,), activation='sigmoid')) #11
+#deep_model.add(Dense(25, input_shape=(50,), activation='sigmoid')) #5
+#deep_model.add(Dense(, input_shape=(5,), activation='sigmoid')) #2
+deep_model.add(Dense(classes_count, input_shape=(500,), activation='softmax'))
 
 deep_model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ["accuracy"])
 
@@ -180,7 +188,7 @@ print(deep_model.summary())
 
 # Обучаем нейросетку
 history = deep_model.fit(train_f_2d, train_l_2d,
-                      epochs=25,
+                      epochs=50,
                       batch_size=64,
                       # shuffle=True,
                       validation_split=0.2,
@@ -220,3 +228,4 @@ max_y_pred_test = np.argmax(y_test, axis=1)
 max_y_test = np.argmax(test_l_2d, axis=1)
 
 show_confusion_matrix(max_y_test, max_y_pred_test)
+

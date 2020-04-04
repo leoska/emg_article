@@ -304,7 +304,7 @@ plt.show()
 
 
 #%%
-# Импортирование данных в mat файл для Андрюхи
+# Импортирование декодированных данных в mat файл для Андрюхи
 test_inputs = load_from_file_with_index(files_path, [1, 2, 3, 4, 5, 6], False)
 encoded_inputs = []
 for person in range(len(test_inputs)):
@@ -316,7 +316,44 @@ for person in range(len(test_inputs)):
         encoded_inputs[person].append(decoded_input)
         
 scipy.io.savemat('out.mat', mdict={'decoded': encoded_inputs})
+
+#%%
+# Импортирование оригинальных данных в mat файл для Андрюхи
+test_inputs = load_from_file_with_index(files_path, [1, 2, 3, 4, 5, 6], False)
+input_inputs = []
+for person in range(len(test_inputs)):
+    input_inputs.append([])
+    for classe in range(len(test_inputs[person])):
+        personClassExp = np.array(test_inputs[person][classe], dtype=np.float64)
+        input_inputs[person].append(personClassExp)
         
+plt.figure(figsize=(12, 6))
+plt.plot(test_inputs[0][0][0], label="До FIR")
+plt.plot(input_inputs[0][0][0], label="после FIR")
+plt.legend()
+plt.show()
+
+scipy.io.savemat('out_filt.mat', mdict={'input': input_inputs})
+
+#%%
+
+# Импортирование оригинальных отфильтрованных данных в mat файл для Андрюхи
+test_inputs = load_from_file_with_index(files_path, [1, 2, 3, 4, 5, 6], False)
+input_inputs = []
+for person in range(len(test_inputs)):
+    input_inputs.append([])
+    for classe in range(len(test_inputs[person])):
+        personClassExp = np.array(test_inputs[person][classe], dtype=np.float64)
+        filteredSignal = get_filtered_signals(personClassExp)
+        input_inputs[person].append(filteredSignal)
+        
+plt.figure(figsize=(12, 6))
+plt.plot(test_inputs[0][0][0], label="До FIR")
+plt.plot(input_inputs[0][0][0], label="после FIR")
+plt.legend()
+plt.show()
+
+scipy.io.savemat('out_filt.mat', mdict={'filr': input_inputs})
         
 # Берем от исходных сигналов преобразование фурье -> подаём на вход автоэнкодера, потом от результата делаем ОПФ
 # Размер спектра - 256.
