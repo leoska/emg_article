@@ -7,13 +7,16 @@ Created on Thu Feb 13 14:11:03 2020
 """
 
 from tensorflow.keras import utils
-from tensorflow.keras.layers import Input, Dense, LeakyReLU
+from tensorflow.keras.layers import Input, Dense, LeakyReLU, Activation
 from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.regularizers import l1
 
 def simpleautoencoder(signal_len):
+    lambda_l1 = 10e-5
+    
     encoder = Sequential()
     encoder.add(Input(shape=(signal_len,)))
-    encoder.add(Dense(32, input_shape=(signal_len,)))
+    encoder.add(Dense(32, input_shape=(signal_len,), activity_regularizer=l1(lambda_l1)))
     encoder.add(LeakyReLU(alpha=0.2))
     
     decoder = Sequential()
@@ -52,3 +55,22 @@ def deepautoencoder(signal_len):
     
     return autoencoder, encoder, decoder
 
+def deepautoencoder_work(signal_len):
+    lambda_l1 = 10e-5
+    
+    encoder = Sequential()
+    encoder.add(Input(shape=(signal_len,)))
+    encoder.add(Dense(128, input_shape=(signal_len,), activity_regularizer=l1(lambda_l1), activation='linear'))
+    #encoder.add(Activation("tanh"))
+    
+    decoder = Sequential()
+    decoder.add(Input(shape=(128,)))
+    decoder.add(Dense(signal_len, input_shape=(128,), activation='linear'))
+    
+    input_signal = Input(shape=(signal_len,))
+    ec_out = encoder(input_signal)
+    dc_out = decoder(ec_out)
+    
+    autoencoder = Model(inputs = input_signal, outputs = dc_out)
+    
+    return autoencoder, encoder, decoder

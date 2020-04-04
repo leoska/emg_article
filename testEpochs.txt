@@ -1,0 +1,40 @@
+0.0014007315782116508 - 200 epochs
+
+0.0014047911016616703 - 100 epochs
+
+0.0014075400485436499 - 50 epochs
+
+0.001402345216865976 - 25 epochs
+
+0.001417589391429812 - 15 epochs
+
+0.0014277209284627363 - 10 epochs
+
+
+def deepautoencoder_work(signal_len):
+    lambda_l1 = 10e-5
+    
+    encoder = Sequential()
+    encoder.add(Input(shape=(signal_len,)))
+    encoder.add(Dense(256, input_shape=(signal_len,)))
+    encoder.add(Activation("linear"))
+    encoder.add(Dense(128, input_shape=(256,)))
+    encoder.add(Activation("linear"))
+    encoder.add(Dense(8, input_shape=(128,), activity_regularizer=l1(lambda_l1)))
+    encoder.add(Activation("linear"))
+    
+    decoder = Sequential()
+    decoder.add(Input(shape=(8,)))
+    decoder.add(Dense(128, input_shape=(8,)))
+    decoder.add(Activation("linear"))
+    decoder.add(Dense(256, input_shape=(128,)))
+    decoder.add(Activation("linear"))
+    decoder.add(Dense(signal_len, input_shape=(256,), activation='tanh'))
+    
+    input_signal = Input(shape=(signal_len,))
+    ec_out = encoder(input_signal)
+    dc_out = decoder(ec_out)
+    
+    autoencoder = Model(inputs = input_signal, outputs = dc_out)
+    
+    return autoencoder, encoder, decoder

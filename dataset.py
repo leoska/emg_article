@@ -81,3 +81,19 @@ def create_dataset_with_validation(file_path, persons, randomize = False, valida
         val_labels = to_categorical(val_labels)
 
     return (train_signals, train_labels), (val_signals, val_labels)
+
+
+def load_from_file_with_index(file_path, persons, randomize):
+    path = file_path + "{}_{}.txt"
+    subjects = []
+    for i in persons:
+        subjects.append([])
+        for j in range(9):
+            subjects[i - 1].append([])
+            with open(path.format(i, j + 1), "rb") as fp:  # Unpickling
+                data = pickle.load(fp)
+
+            for k in range(np.shape(data)[0]):
+                subjects[i - 1][j].append(data[k])
+    
+    return subjects
